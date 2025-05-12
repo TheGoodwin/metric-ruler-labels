@@ -236,7 +236,7 @@ Hooks.once('ready', () => {
                         wrappedResult.converted.elevation.delta = convertedElevationDeltaNumber
                     }
 
-                    console.log(wrappedResult)
+                    console.log(wrappedResult) // TODO : Remove
                 }
 
                 return wrappedResult;
