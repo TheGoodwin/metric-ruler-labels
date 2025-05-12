@@ -1,27 +1,30 @@
 {
-  "id": "metric-ruler-labels",
-  "name": "metric-ruler-labels",
-  "title": "Additional Metric Ruler Labels",
+  "id": "thegoodwin-metric-ruler-labels",
+  "name": "thegoodwin-metric-ruler-labels",
+  "title": "TheGoodwin - Additional Metric Ruler Labels",
   "description": "A simple module that add additional metric conversions for your ruler and measureTemplates. Supported units are (ft, ft., feet, mi, mi., miles). Or add your own custom measurement conversion and even travel time labels.",
   "version": "This is auto replaced",
   "library": "false",
   "minimumCoreVersion": "9",
   "compatibleCoreVersion": "12",
-    "compatibility": {
+  "compatibility": {
     "minimum": "9",
     "verified": "12",
-    "maximum": "12"
+    "maximum": "13.999"
   },
   "authors": [
     {
       "name": "Roger",
       "url": "https://github.com/Roger92",
       "discord": "Roger#5198"
+    },
+    {
+      "name": "TheGoodwin",
+      "url": "https://github.com/TheGoodwin",
+      "discord": "soulmourne"
     }
   ],
-  "dependencies": [
-
-  ],
+  "dependencies": [],
   "relationships": {
     "requires": [
       {
@@ -33,8 +36,7 @@
   "esmodules": [
     "/scripts/module.js"
   ],
-  "scripts": [
-  ],
+  "scripts": [],
   "styles": [
     "/styles/module.css"
   ],
