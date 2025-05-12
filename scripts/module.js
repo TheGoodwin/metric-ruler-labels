@@ -189,7 +189,7 @@ Hooks.once('ready', () => {
             }, 'WRAPPER');
         } else {
             // Handling of ruler waypoint labels for V13
-            let waypointTemplatePath = "modules/metric-ruler-labels/templates/hud/waypoint-label.hbs"
+            let waypointTemplatePath = "modules/metric-ruler-labels/templates/hud/waypoint-label-vertical.hbs"
             foundry.canvas.interaction.Ruler.WAYPOINT_LABEL_TEMPLATE = waypointTemplatePath
             foundry.canvas.placeables.tokens.TokenRuler.WAYPOINT_LABEL_TEMPLATE = waypointTemplatePath
 
