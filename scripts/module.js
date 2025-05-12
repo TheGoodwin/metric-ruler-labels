@@ -25,12 +25,12 @@ Hooks.once('ready', () => {
                     label: "Got it!"
                 }
             }
-        }, {width: 600}).render(true);
+        }, { width: 600 }).render(true);
     } else {
 
         //Check foundry generation
         let foundryGeneration = game.release.generation;
-        if (foundryGeneration < 9 || foundryGeneration > 12) {
+        if (foundryGeneration < 9 || foundryGeneration > 13) {
             showIncompatibilityDialog(foundryGeneration);
         }
 
@@ -71,9 +71,35 @@ Hooks.once('ready', () => {
 
                 return wrappedResult;
             }, 'MIXED');
-        } else if (foundryGeneration > 10) {
+        } else if (foundryGeneration > 10 && foundryGeneration <= 12) {
             //Handling of MeasureTemplate Drag and Drop (V11)
             libWrapper.register("metric-ruler-labels", "MeasuredTemplate.prototype._refreshRulerText", async function (wrapped, ...args) {
+                let wrappedResult = await wrapped(...args);
+                let measureTemplateSupport = game.settings.get("metric-ruler-labels", "measureTemplateSupport");
+                let templates = game.canvas.templates.children[0].children;
+                for (let i = 0; i < templates.length; i++) {
+                    if (measureTemplateSupport && templates[i].ruler && templates[i].ruler.text.split("\n").length === 1) {
+                        templates[i].ruler.text = addMetricLabels(templates[i].ruler.text);
+                        templates[i].ruler.text = addCustomConversionLabels(templates[i].ruler.text);
+                        templates[i].ruler.text = hideFoundryLabel(templates[i].ruler.text);
+                    }
+                }
+                templates = game.canvas.templates.children[1].children;
+                for (let i = 0; i < templates.length; i++) {
+                    if (measureTemplateSupport && templates[i].ruler && templates[i].ruler.text.split("\n").length === 1) {
+                        templates[i].ruler.text = addMetricLabels(templates[i].ruler.text);
+                        templates[i].ruler.text = addCustomConversionLabels(templates[i].ruler.text);
+                        templates[i].ruler.text = hideFoundryLabel(templates[i].ruler.text);
+                    }
+                }
+                return wrappedResult;
+            }, 'MIXED');
+        } else if (foundryGeneration > 13) {
+            //Handling of MeasureTemplate Drag and Drop (V13)
+            // TODO : Test with PF2 after beta for V13 and test with DnD system
+            libWrapper.register("metric-ruler-labels", "MeasuredTemplate.prototype._refreshRulerText", async function (wrapped, ...args) {
+                console.log("Try generation 13")
+
                 let wrappedResult = await wrapped(...args);
                 let measureTemplateSupport = game.settings.get("metric-ruler-labels", "measureTemplateSupport");
                 let templates = game.canvas.templates.children[0].children;
@@ -119,47 +145,77 @@ Hooks.once('ready', () => {
             }, 'WRAPPER');
         }
 
-        //Handling of Ruler + Elevation Ruler
-        libWrapper.register("metric-ruler-labels", "Ruler.prototype.measure", function (wrapped, ...args) {
-            let wrappedResult = wrapped(...args);
-            let dragRulerSupport = game.settings.get("metric-ruler-labels", "dragRulerSupport");
-            let foundryGeneration = game.release.generation;
+        if (foundryGeneration < 13) {
+            //Handling of Ruler + Elevation Ruler for V10 to V12
+            libWrapper.register("metric-ruler-labels", "Ruler.prototype.measure", function (wrapped, ...args) {
+                let wrappedResult = wrapped(...args);
+                let dragRulerSupport = game.settings.get("metric-ruler-labels", "dragRulerSupport");
+                let foundryGeneration = game.release.generation;
 
-            if (foundryGeneration < 10) {
-                if (wrappedResult.label) {
-                    let segment = wrappedResult;
-                    //Loop over all prior segments of the ruler
-                    do {
-                        segment.label.text = addMetricLabels(segment.label.text);
-                        segment.label.text = addCustomConversionLabels(segment.label.text);
-                        segment.label.text = addTravelTime(segment.label.text);
-                        segment.label.text = hideFoundryLabel(segment.label.text)
+                if (foundryGeneration < 10) {
+                    if (wrappedResult.label) {
+                        let segment = wrappedResult;
+                        //Loop over all prior segments of the ruler
+                        do {
+                            segment.label.text = addMetricLabels(segment.label.text);
+                            segment.label.text = addCustomConversionLabels(segment.label.text);
+                            segment.label.text = addTravelTime(segment.label.text);
+                            segment.label.text = hideFoundryLabel(segment.label.text)
 
-                        // Go to prior segment and convert label -> For the case that the ruler has waypoints
-                        segment = segment.prior_segment;
-                    } while (segment !== undefined && Object.keys(segment).length > 0);
+                            // Go to prior segment and convert label -> For the case that the ruler has waypoints
+                            segment = segment.prior_segment;
+                        } while (segment !== undefined && Object.keys(segment).length > 0);
 
-                } else if ((dragRulerSupport === "dragRulerSupport") && Array.isArray(wrappedResult) && wrappedResult.length > 0) { //Handling for Dragruler Support
-                    for (let i = 0; i < wrappedResult.length; i++) {
-                        wrappedResult[i].label.text = addMetricLabels(wrappedResult[i].label.text);
-                        wrappedResult[i].label.text = addCustomConversionLabels(wrappedResult[i].label.text);
-                        wrappedResult[i].label.text = addTravelTime(wrappedResult[i].label.text, wrappedResult.length > 1);
-                        wrappedResult[i].label.text = hideFoundryLabel(wrappedResult[i].label.text)
+                    } else if ((dragRulerSupport === "dragRulerSupport") && Array.isArray(wrappedResult) && wrappedResult.length > 0) { //Handling for Dragruler Support
+                        for (let i = 0; i < wrappedResult.length; i++) {
+                            wrappedResult[i].label.text = addMetricLabels(wrappedResult[i].label.text);
+                            wrappedResult[i].label.text = addCustomConversionLabels(wrappedResult[i].label.text);
+                            wrappedResult[i].label.text = addTravelTime(wrappedResult[i].label.text, wrappedResult.length > 1);
+                            wrappedResult[i].label.text = hideFoundryLabel(wrappedResult[i].label.text)
+                        }
+                    }
+                } else {
+                    if (Array.isArray(wrappedResult) && wrappedResult.length > 0) {
+                        for (let i = 0; i < wrappedResult.length; i++) {
+                            wrappedResult[i].label.text = addMetricLabels(wrappedResult[i].label.text);
+                            wrappedResult[i].label.text = addCustomConversionLabels(wrappedResult[i].label.text);
+                            wrappedResult[i].label.text = addTravelTime(wrappedResult[i].label.text, wrappedResult.length > 1);
+                            wrappedResult[i].label.text = hideFoundryLabel(wrappedResult[i].label.text)
+                        }
                     }
                 }
-            } else {
-                if (Array.isArray(wrappedResult) && wrappedResult.length > 0) {
-                    for (let i = 0; i < wrappedResult.length; i++) {
-                        wrappedResult[i].label.text = addMetricLabels(wrappedResult[i].label.text);
-                        wrappedResult[i].label.text = addCustomConversionLabels(wrappedResult[i].label.text);
-                        wrappedResult[i].label.text = addTravelTime(wrappedResult[i].label.text, wrappedResult.length > 1);
-                        wrappedResult[i].label.text = hideFoundryLabel(wrappedResult[i].label.text)
-                    }
-                }
-            }
 
-            return wrappedResult;
-        }, 'WRAPPER');
+                return wrappedResult;
+            }, 'WRAPPER');
+        } else {
+            // Handling of ruler waypoint labels for V13
+            let waypointTemplatePath = "modules/metric-ruler-labels/templates/hud/waypoint-label.hbs"
+            foundry.canvas.interaction.Ruler.WAYPOINT_LABEL_TEMPLATE = waypointTemplatePath
+
+            libWrapper.register("metric-ruler-labels", "foundry.canvas.interaction.Ruler.prototype._getWaypointLabelContext", function (wrapped, ...args) {
+                let wrappedResult = wrapped(...args);
+
+                if (wrappedResult != undefined) {
+                    console.log(wrappedResult) // TODO : Remove
+
+                    let convertedDistance = getMetricLabels(wrappedResult.distance.total + " " + wrappedResult.units)
+                    let convertedDistanceSplit = convertedDistance.split(" ")
+                    let convertedDistanceNumber = convertedDistanceSplit[0]
+                    let convertedDistanceUnits = convertedDistanceSplit[1]
+
+                    wrappedResult.converted = {
+                        distance: {
+                            total: convertedDistanceNumber
+                        },
+                        units: convertedDistanceUnits
+                    };
+
+                    console.log(wrappedResult)
+                }
+
+                return wrappedResult;
+            }, 'WRAPPER');
+        }
 
         let dragRulerSupport = game.settings.get("metric-ruler-labels", "dragRulerSupport")
 
@@ -202,7 +258,7 @@ Hooks.once('ready', () => {
         }
     }
 })
-;
+    ;
 
 function registerSettings() {
     game.settings.register("metric-ruler-labels", "measureTemplateSupport", {
@@ -220,10 +276,10 @@ function registerSettings() {
         config: true,
         type: String,
         default: "dragRulerSupport",
-        choices:{
+        choices: {
             "noDragRulerSupport": "metric-ruler-labels.settings.dragRulerSupport.disabled",
-            "dragRulerSupport" : "metric-ruler-labels.settings.dragRulerSupport.dragRuler",
-            "pf2eDragRulerSupport" : "metric-ruler-labels.settings.dragRulerSupport.pf2eTokenDragRuler"
+            "dragRulerSupport": "metric-ruler-labels.settings.dragRulerSupport.dragRuler",
+            "pf2eDragRulerSupport": "metric-ruler-labels.settings.dragRulerSupport.pf2eTokenDragRuler"
         }
     });
     game.settings.register("metric-ruler-labels", "hideFoundryMeasurement", {
@@ -371,18 +427,34 @@ function addMetricLabels(text) {
     let dontUseMetricConversions = game.settings.get("metric-ruler-labels", "disableBuiltInConversion");
     const textLines = text ? text.split("\n") : "";
     if (dontUseMetricConversions === false && textLines.length > 0) {
-        let convertedText = convertDistanceString(textLines[0],["ft.","ft","feet"],"m",0.3);
-        if(convertedText !== textLines[0]){
+        let convertedText = convertDistanceString(textLines[0], ["ft.", "ft", "feet"], "m", 0.3);
+        if (convertedText !== textLines[0]) {
             text += " \n "
             text += convertedText;
         }
-        convertedText = convertDistanceString(textLines[0],["mi.","mi","miles"],"km",1.61);
-        if(convertedText !== textLines[0]){
+        convertedText = convertDistanceString(textLines[0], ["mi.", "mi", "miles"], "km", 1.61);
+        if (convertedText !== textLines[0]) {
             text += " \n "
             text += convertedText;
         }
     }
     return text;
+}
+
+/**
+ * Gets only the metric labels to a given text by converting distances in the first line of the text.
+ *
+ * This function checks if built-in metric conversions are enabled and, if so, converts any distances
+ * found in the first line of the input text from imperial units ("ft.","ft","feet" and "ft.","ft","feet") to metric units ("m" and "km").
+ * The converted values are appended as additional lines to the original text.
+ *
+ * @param {string} text -  The text that contains the distances (e.g. the ruler label)
+ * @returns {string} The input text with only the metric conversions, if applicable.
+ */
+function getMetricLabels(text) {
+    let multipleLabels = addMetricLabels(text)
+    let textLines = multipleLabels ? multipleLabels.split("\n") : "";
+    return textLines[1].trim()
 }
 
 /**
@@ -412,17 +484,17 @@ function addCustomConversionLabels(text) {
         if ((!originalLabelsSmall && !conversionFactorSmall)
             && (!originalLabelsBig && !conversionFactorBig)) {
             text += " \n " + game.i18n.localize("metric-ruler-labels.warnings.customConversionNoValues.text");
-        } else if(textLines.length > 0) {
-            if(originalLabelsSmall && conversionFactorSmall){
-                let convertedText = convertDistanceString(textLines[0],originalLabelsSmall,customConversionLabelSmall,conversionFactorSmall);
-                if(convertedText !== textLines[0]){
+        } else if (textLines.length > 0) {
+            if (originalLabelsSmall && conversionFactorSmall) {
+                let convertedText = convertDistanceString(textLines[0], originalLabelsSmall, customConversionLabelSmall, conversionFactorSmall);
+                if (convertedText !== textLines[0]) {
                     text += " \n "
                     text += convertedText;
                 }
             }
-            if(originalLabelsBig && conversionFactorBig){
-                let convertedText = convertDistanceString(textLines[0],originalLabelsBig,customConversionLabelBig,conversionFactorBig);
-                if(convertedText !== textLines[0]){
+            if (originalLabelsBig && conversionFactorBig) {
+                let convertedText = convertDistanceString(textLines[0], originalLabelsBig, customConversionLabelBig, conversionFactorBig);
+                if (convertedText !== textLines[0]) {
                     text += " \n "
                     text += convertedText;
                 }
@@ -534,7 +606,7 @@ function hideFoundryLabel(text) {
  * const result = convertDistanceString(text, ["ft", "ft.", "feet"], "meter", 3);
  * console.log(result); // "1.50 m [1.50 m] x 1.50 m [1.50 m]"
  */
-function convertDistanceString(text,searchLabels,newLabel,conversionFactor){
+function convertDistanceString(text, searchLabels, newLabel, conversionFactor) {
     //Sort labels so that more specific ones come first
     searchLabels.sort((a, b) => b.length - a.length);
 
@@ -577,7 +649,7 @@ function showIncompatibilityDialog(generation) {
                 label: "Got it!"
             }
         }
-    }, {width: 600}).render(true);
+    }, { width: 600 }).render(true);
 }
 
 /**
