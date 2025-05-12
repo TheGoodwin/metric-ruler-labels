@@ -204,11 +204,19 @@ Hooks.once('ready', () => {
                     let convertedDistanceNumber = convertedDistanceSplit[0]
                     let convertedDistanceUnits = convertedDistanceSplit[1]
 
+                    // Elevation Distance
+                    let convertedElevationDistance = getMetricLabels(wrappedResult.elevation.total + " " + wrappedResult.units)
+                    let convertedElevationDistanceSplit = convertedElevationDistance.split(" ")
+                    let convertedElevationDistanceNumber = convertedElevationDistanceSplit[0]
+
                     wrappedResult.converted = {
                         distance: {
                             total: convertedDistanceNumber
                         },
-                        units: convertedDistanceUnits
+                        units: convertedDistanceUnits,
+                        elevation: {
+                            total: convertedElevationDistanceNumber
+                        }
                     };
 
                     // Distance Delta
@@ -218,6 +226,14 @@ Hooks.once('ready', () => {
                         let convertedDeltaNumber = convertedDeltaSplit[0]
 
                         wrappedResult.converted.distance.delta = convertedDeltaNumber
+                    }
+
+                    if (wrappedResult.elevation.delta) {
+                        let convertedElevationDelta = getMetricLabels(wrappedResult.elevation.delta + " " + wrappedResult.units)
+                        let convertedElevationDeltaSplit = convertedElevationDelta.split(" ")
+                        let convertedElevationDeltaNumber = convertedElevationDeltaSplit[0]
+
+                        wrappedResult.converted.elevation.delta = convertedElevationDeltaNumber
                     }
 
                     console.log(wrappedResult)

@@ -48,9 +48,9 @@
         {{/if}}
         {{#if (and elevation (not elevation.hidden))}}
         <i class="icon {{elevation.icon}}"></i>
-        <span class="total-elevation">{{elevation.total}} {{units}}</span>
+        <span class="total-elevation">{{converted.elevation.total}} {{converted.units}}</span>
         {{#if elevation.delta}}
-        <span class="delta-elevation">({{elevation.delta}})</span>
+        <span class="delta-elevation">({{converted.elevation.delta}})</span>
         {{/if}}
         {{/if}}
         {{#if secret}}
