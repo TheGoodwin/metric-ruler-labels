@@ -192,55 +192,8 @@ Hooks.once('ready', () => {
             let waypointTemplatePath = "modules/metric-ruler-labels/templates/hud/waypoint-label.hbs"
             foundry.canvas.interaction.Ruler.WAYPOINT_LABEL_TEMPLATE = waypointTemplatePath
 
-            libWrapper.register("metric-ruler-labels", "foundry.canvas.interaction.Ruler.prototype._getWaypointLabelContext", function (wrapped, ...args) {
-                let wrappedResult = wrapped(...args);
-
-                if (wrappedResult != undefined) {
-                    console.log(wrappedResult) // TODO : Remove
-
-                    // Distance
-                    let convertedDistance = getMetricLabels(wrappedResult.distance.total + " " + wrappedResult.units)
-                    let convertedDistanceSplit = convertedDistance.split(" ")
-                    let convertedDistanceNumber = convertedDistanceSplit[0]
-                    let convertedDistanceUnits = convertedDistanceSplit[1]
-
-                    // Elevation Distance
-                    let convertedElevationDistance = getMetricLabels(wrappedResult.elevation.total + " " + wrappedResult.units)
-                    let convertedElevationDistanceSplit = convertedElevationDistance.split(" ")
-                    let convertedElevationDistanceNumber = convertedElevationDistanceSplit[0]
-
-                    wrappedResult.converted = {
-                        distance: {
-                            total: convertedDistanceNumber
-                        },
-                        units: convertedDistanceUnits,
-                        elevation: {
-                            total: convertedElevationDistanceNumber
-                        }
-                    };
-
-                    // Distance Delta
-                    if (wrappedResult.distance.delta) {
-                        let convertedDelta = getMetricLabels(wrappedResult.distance.delta + " " + wrappedResult.units)
-                        let convertedDeltaSplit = convertedDelta.split(" ")
-                        let convertedDeltaNumber = convertedDeltaSplit[0]
-
-                        wrappedResult.converted.distance.delta = convertedDeltaNumber
-                    }
-
-                    if (wrappedResult.elevation.delta) {
-                        let convertedElevationDelta = getMetricLabels(wrappedResult.elevation.delta + " " + wrappedResult.units)
-                        let convertedElevationDeltaSplit = convertedElevationDelta.split(" ")
-                        let convertedElevationDeltaNumber = convertedElevationDeltaSplit[0]
-
-                        wrappedResult.converted.elevation.delta = convertedElevationDeltaNumber
-                    }
-
-                    console.log(wrappedResult) // TODO : Remove
-                }
-
-                return wrappedResult;
-            }, 'WRAPPER');
+            libWrapper.register("metric-ruler-labels", "foundry.canvas.interaction.Ruler.prototype._getWaypointLabelContext", wrapRuler_getWaypointLabelContext, 'WRAPPER');
+            libWrapper.register("metric-ruler-labels", "foundry.canvas.placeables.tokens.TokenRuler.prototype._getWaypointLabelContext", wrapRuler_getWaypointLabelContext, 'WRAPPER');
         }
 
         let dragRulerSupport = game.settings.get("metric-ruler-labels", "dragRulerSupport")
@@ -285,6 +238,68 @@ Hooks.once('ready', () => {
     }
 })
     ;
+
+/**
+ * Function wrapping the _getWaypointLabelContext used by Ruler to get label information
+ * @param {*} wrapped the wrapped function
+ * @param  {...any} args the wrapped function args
+ * @returns the wrapped result
+ */
+function wrapRuler_getWaypointLabelContext(wrapped, ...args) {
+    let wrappedResult = wrapped(...args);
+
+    if (wrappedResult != undefined) {
+        console.log(wrappedResult) // TODO : Remove
+
+        // Distance
+        let convertedDistance = getMetricLabels(wrappedResult.distance.total + " " + wrappedResult.units)
+        let convertedDistanceSplit = convertedDistance.split(" ")
+        let convertedDistanceNumber = convertedDistanceSplit[0]
+        let convertedDistanceUnits = convertedDistanceSplit[1]
+
+        // Elevation Distance
+        let convertedElevationDistance = getMetricLabels(wrappedResult.elevation.total + " " + wrappedResult.units)
+        let convertedElevationDistanceSplit = convertedElevationDistance.split(" ")
+        let convertedElevationDistanceNumber = convertedElevationDistanceSplit[0]
+
+        wrappedResult.converted = {
+            distance: {
+                total: convertedDistanceNumber
+            },
+            units: convertedDistanceUnits,
+            elevation: {
+                total: convertedElevationDistanceNumber
+            }
+        };
+
+        // Distance Delta
+        if (wrappedResult.distance.delta) {
+            let convertedDelta = getMetricLabels(wrappedResult.distance.delta + " " + wrappedResult.units)
+            let convertedDeltaSplit = convertedDelta.split(" ")
+            let convertedDeltaNumber = convertedDeltaSplit[0]
+
+            wrappedResult.converted.distance.delta = convertedDeltaNumber
+        }
+
+        // Elevation Delta
+        if (wrappedResult.elevation.delta) {
+            let convertedElevationDelta = getMetricLabels(wrappedResult.elevation.delta + " " + wrappedResult.units)
+            let convertedElevationDeltaSplit = convertedElevationDelta.split(" ")
+            let convertedElevationDeltaNumber = convertedElevationDeltaSplit[0]
+
+            wrappedResult.converted.elevation.delta = convertedElevationDeltaNumber
+        }
+
+        // Cost
+        if (wrappedResult.cost) {
+
+        }
+
+        console.log(wrappedResult) // TODO : Remove
+    }
+
+    return wrappedResult;
+}
 
 function registerSettings() {
     game.settings.register("metric-ruler-labels", "measureTemplateSupport", {
