@@ -198,6 +198,7 @@ Hooks.once('ready', () => {
                 if (wrappedResult != undefined) {
                     console.log(wrappedResult) // TODO : Remove
 
+                    // Distance
                     let convertedDistance = getMetricLabels(wrappedResult.distance.total + " " + wrappedResult.units)
                     let convertedDistanceSplit = convertedDistance.split(" ")
                     let convertedDistanceNumber = convertedDistanceSplit[0]
@@ -209,6 +210,15 @@ Hooks.once('ready', () => {
                         },
                         units: convertedDistanceUnits
                     };
+
+                    // Distance Delta
+                    if (wrappedResult.distance.delta) {
+                        let convertedDelta = getMetricLabels(wrappedResult.distance.delta + " " + wrappedResult.units)
+                        let convertedDeltaSplit = convertedDelta.split(" ")
+                        let convertedDeltaNumber = convertedDeltaSplit[0]
+
+                        wrappedResult.converted.distance.delta = convertedDeltaNumber
+                    }
 
                     console.log(wrappedResult)
                 }

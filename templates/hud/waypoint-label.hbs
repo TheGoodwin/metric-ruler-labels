@@ -43,7 +43,7 @@
         {{else}}
         <span class="total-measurement">{{converted.distance.total}} {{converted.units}}</span>
         {{#if distance.delta}}
-        <span class="delta-measurement">({{distance.delta}})</span>
+        <span class="delta-measurement">({{converted.distance.delta}})</span>
         {{/if}}
         {{/if}}
         {{#if (and elevation (not elevation.hidden))}}
