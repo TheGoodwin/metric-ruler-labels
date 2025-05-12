@@ -191,6 +191,7 @@ Hooks.once('ready', () => {
             // Handling of ruler waypoint labels for V13
             let waypointTemplatePath = "modules/metric-ruler-labels/templates/hud/waypoint-label.hbs"
             foundry.canvas.interaction.Ruler.WAYPOINT_LABEL_TEMPLATE = waypointTemplatePath
+            foundry.canvas.placeables.tokens.TokenRuler.WAYPOINT_LABEL_TEMPLATE = waypointTemplatePath
 
             libWrapper.register("metric-ruler-labels", "foundry.canvas.interaction.Ruler.prototype._getWaypointLabelContext", wrapRuler_getWaypointLabelContext, 'WRAPPER');
             libWrapper.register("metric-ruler-labels", "foundry.canvas.placeables.tokens.TokenRuler.prototype._getWaypointLabelContext", wrapRuler_getWaypointLabelContext, 'WRAPPER');
@@ -292,7 +293,25 @@ function wrapRuler_getWaypointLabelContext(wrapped, ...args) {
 
         // Cost
         if (wrappedResult.cost) {
+            // Cost distance
+            let convertedCost = getMetricLabels(wrappedResult.cost.total + " " + wrappedResult.cost.units)
+            let convertedCostSplit = convertedCost.split(" ")
+            let convertedCostNumber = convertedCostSplit[0]
+            let convertedCostUnits = convertedCostSplit[1]
 
+            wrappedResult.converted.cost = {
+                total: convertedCostNumber,
+                units: convertedCostUnits
+            }
+
+            // Cost Distance Delta
+            if (wrappedResult.cost.delta) {
+                let convertedCostDelta = getMetricLabels(wrappedResult.cost.delta + " " + wrappedResult.cost.units)
+                let convertedCostDeltaSplit = convertedCostDelta.split(" ")
+                let convertedCostDeltaNumber = convertedCostDeltaSplit[0]
+
+                wrappedResult.converted.cost.delta = convertedCostDeltaNumber
+            }
         }
 
         console.log(wrappedResult) // TODO : Remove

@@ -36,9 +36,9 @@
         <label class="action-label">{{localize action.label}}</label>
         {{/if}}
         {{#if cost}}
-        <span class="total-measurement">{{cost.total}} {{cost.units}}</span>
+        <span class="total-measurement">{{converted.cost.total}} {{converted.cost.units}}</span>
         {{#if cost.delta}}
-        <span class="delta-measurement">({{cost.delta}})</span>
+        <span class="delta-measurement">({{converted.cost.delta}})</span>
         {{/if}}
         {{else}}
         <span class="total-measurement">{{converted.distance.total}} {{converted.units}}</span>
