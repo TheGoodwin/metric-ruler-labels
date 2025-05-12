@@ -250,8 +250,6 @@ function wrapRuler_getWaypointLabelContext(wrapped, ...args) {
     let wrappedResult = wrapped(...args);
 
     if (wrappedResult != undefined) {
-        console.log(wrappedResult) // TODO : Remove
-
         // Distance
         let convertedDistance = getMetricLabels(wrappedResult.distance.total + " " + wrappedResult.units)
         let convertedDistanceSplit = convertedDistance.split(" ")
@@ -313,8 +311,6 @@ function wrapRuler_getWaypointLabelContext(wrapped, ...args) {
                 wrappedResult.converted.cost.delta = convertedCostDeltaNumber
             }
         }
-
-        console.log(wrappedResult) // TODO : Remove
     }
 
     return wrappedResult;
