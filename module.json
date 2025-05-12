@@ -1,6 +1,6 @@
 {
-  "id": "thegoodwin-metric-ruler-labels",
-  "name": "thegoodwin-metric-ruler-labels",
+  "id": "metric-ruler-labels",
+  "name": "metric-ruler-labels",
   "title": "TheGoodwin - Additional Metric Ruler Labels",
   "description": "A simple module that add additional metric conversions for your ruler and measureTemplates. Supported units are (ft, ft., feet, mi, mi., miles). Or add your own custom measurement conversion and even travel time labels.",
   "version": "This is auto replaced",
